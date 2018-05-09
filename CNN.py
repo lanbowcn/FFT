@@ -1,5 +1,7 @@
 from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
+import numpy as np
+
 
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)  # 读取图片数据集
 sess = tf.InteractiveSession()  # 创建session
@@ -32,12 +34,12 @@ def max_pool_2x2(x):
 # 二，定义输入输出结构
 
 # 声明一个占位符，None表示输入图片的数量不定，28*28图片分辨率
-xs = tf.placeholder(tf.float32, [None, 28 * 28])
+xs = tf.placeholder(tf.float32, [None, 101, 99, 1])
 # 类别是0-9总共10个类别，对应输出分类结果
-ys = tf.placeholder(tf.float32, [None, 10])
+ys = tf.placeholder(tf.float32, [None, 2])
 keep_prob = tf.placeholder(tf.float32)
 # x_image又把xs reshape成了28*28*1的形状，因为是灰色图片，所以通道是1.作为训练时的input，-1代表图片数量不定
-x_image = tf.reshape(xs, [-1, 28, 28, 1])
+x_image = tf.reshape(xs, [-1, 101, 99, 1])
 
 # 三，搭建网络,定义算法公式，也就是forward时的计算
 
@@ -91,11 +93,39 @@ train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)  # �
 # 五，开始数据训练以及评测
 correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(ys, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+
 tf.global_variables_initializer().run()
-for i in range(20000):
+ITERS = 20000
+BATCH_SIZE = 64
+data, label = read()
+
+train_data = data[]
+train_label = label[]
+
+test_data =
+test_label =
+
+
+
+
+for i in range(iterations):
+    perm = np.arange(3)
+    np.random.shuffle(perm)
+    shuf_data = train_data[perm]
+
+    for x in range(1000):
+        train_d = train_data[0:64]
+
+        train_step.run(feed_dict={xs: batch[0], ys: batch[1], keep_prob: 0.5})
+
     batch = mnist.train.next_batch(50)
+    data, label = read()
+    data.rehsape((data.shape[0], 101, 99, 1))
+
     if i % 100 == 0:
-        train_accuracy = accuracy.eval(feed_dict={xs: batch[0], ys: batch[1], keep_prob: 1.0})
+        train_accuracy = accuracy.eval(feed_dict={xs: data, ys: label, keep_prob: 1.0})
         print("step %d, training accuracy %g" % (i, train_accuracy))
     train_step.run(feed_dict={xs: batch[0], ys: batch[1], keep_prob: 0.5})
 print("test accuracy %g" % accuracy.eval(feed_dict={xs: mnist.test.images, ys: mnist.test.labels, keep_prob: 1.0}))
+# sess.run(accuracy, feed_dict=)
