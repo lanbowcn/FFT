@@ -6,3 +6,10 @@ np.random.shuffle(perm)
 shuf_data = data[perm]
 print(shuf_data)
 
+My_matrix=np.matrix([[1,2,3],[2,3,4],[3,4,5]])
+My_matrix2=np.matrix([[1,2,3],[2,3,4],[3,4,5]])
+b=[]
+b.append(My_matrix)
+print(b)
+b.append(My_matrix2)
+print(b[0].shape)

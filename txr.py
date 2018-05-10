@@ -3,11 +3,20 @@ import os
 import numpy as np
 from scipy import signal
 from scipy.io import wavfile
+import csv
 #提取时频特征
 def get_spectrogram(segment):#, audio):
     segment=segment/ (np.sqrt(np.sum(audio*audio)/len(audio)))
     f, t, Sxx = signal.spectrogram(segment, fs=2000, nperseg=200, noverlap=100,mode='magnitude')
     return Sxx
+
+dictpath=r'D:\xinyin\xinyin\training\training-a\REFERENCE.csv'
+with open(dictpath,'r') as csvfile:
+    reader = csv.reader(csvfile)
+    rows= [row for row in reader]
+    labeldict=dict(rows)
+
+labelpath=r'D:\xinyin\xinyin\training\training-a\REFERENCE2.csv'
 
 wavpath = r'D:\xinyin\xinyin\training\training-a'
 for (root, dir, files) in os.walk(wavpath):
@@ -26,3 +35,4 @@ for (root, dir, files) in os.walk(wavpath):
                 # sxx=sxx.reshape(1,1,101,99)
                 print(sxx.shape)
                 np.savetxt(root+'\\'+'spect'+'\\'+filename+'-'+str(i)+'.csv', sxx, fmt='%f', delimiter=',')
+

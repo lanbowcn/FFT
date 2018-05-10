@@ -1,9 +1,9 @@
 from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
 import numpy as np
+import os
+import csv
 
-
-mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)  # 读取图片数据集
 sess = tf.InteractiveSession()  # 创建session
 
 
@@ -96,7 +96,7 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 
 tf.global_variables_initializer().run()
-ITERS = 20000
+ITERS = 20000#总迭代次数
 BATCH_SIZE = 64
 data, label = read()
 
@@ -106,10 +106,7 @@ train_label = label[]
 test_data =
 test_label =
 
-
-
-
-for i in range(iterations):
+for i in range(ITERS):
     perm = np.arange(3)
     np.random.shuffle(perm)
     shuf_data = train_data[perm]
@@ -120,7 +117,8 @@ for i in range(iterations):
         train_step.run(feed_dict={xs: batch[0], ys: batch[1], keep_prob: 0.5})
 
     batch = mnist.train.next_batch(50)
-    data, label = read()
+    data = readdata()
+    label = readlabel()
     data.rehsape((data.shape[0], 101, 99, 1))
 
     if i % 100 == 0:
@@ -129,3 +127,23 @@ for i in range(iterations):
     train_step.run(feed_dict={xs: batch[0], ys: batch[1], keep_prob: 0.5})
 print("test accuracy %g" % accuracy.eval(feed_dict={xs: mnist.test.images, ys: mnist.test.labels, keep_prob: 1.0}))
 # sess.run(accuracy, feed_dict=)
+
+def readdata(batchnumber,batchsize):
+    # 文件操作：测试提取一定规模的训练样本
+    data=[]
+    label=[]
+    filepath = r'D:\xinyin\xinyin\training\training-a\spect'
+    for (root, dir, files) in os.walk(filepath):
+        # 加载 录音-标签 字典
+        with open(os.path.join(r'D:\xinyin\xinyin\training\training-a\REFERENCE.csv'), 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            rows = [row for row in reader]
+            labedict = dict(rows)
+            for file in files[(batchnumber-1)*batchsize:batchnumber*batchsize]:
+                matrixpath = os.path.join(root, file)
+                filename = file.split('-', 2)[0]
+                my_matrix = np.loadtxt(open(matrixpath, "rb"), delimiter=",", skiprows=0)
+                # print(os.path.join(root,file))输出带根目录的文件路径
+                data.append(my_matrix)
+                label.append(labedict[filename])
+    return data,label
