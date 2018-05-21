@@ -113,7 +113,7 @@ def readdata(batchnumber,batchsize):
     label=np.reshape(label,[-1,1])
     return data,label
 
-correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(ys, 1))
+correct_prediction = tf.equal(y_conv, ys)
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 
@@ -122,15 +122,16 @@ ITERS = 20000#总迭代次数
 BATCH_SIZE = 64
 
 #剩余数据作为测试
-test_data,test_label =readdata(41,64)
+test_data,test_label =readdata(40,64)
 # test_data=np.reshape(test_data,(64,101,99,1))
 # test_label=np.reshape(test_label,(-1.1))
 
-for i in range(1,40):
+for i in range(1, 39):
     data,label= readdata(i,64)#次数出现为list类型
     # data = np.reshape(data, (64, 101, 99, 1))
     # label = np.reshape(label,(-1,1))
-    train_step.run(feed_dict={xs: data, ys: label, keep_prob: 0.5})
+    # train_step.run(feed_dict={xs: data, ys: label, keep_prob: 0.5})
+    train_accuracy = accuracy.eval(feed_dict={xs:data, ys: label, keep_prob: 0.5})
     # data.rehsape((data.shape[0], 101, 99, 1))
     if i % 2 == 0:
         train_accuracy = accuracy.eval(feed_dict={xs: test_data, ys: test_label, keep_prob: 1.0})
