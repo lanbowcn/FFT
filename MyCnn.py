@@ -25,6 +25,10 @@ def conv2d(x, W):
     # 卷积遍历各方向步数为1，SAME：边缘外自动补0，遍历相乘
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
+def conv2d2s(x, W):
+    # 卷积遍历各方向步数为1，SAME：边缘外自动补0，遍历相乘
+    return tf.nn.conv2d(x, W, strides=[1, 6, 6, 1], padding='VALID')
+
 
 def max_pool_2x2(x):
     # 池化卷积结果（conv2d）池化层采用kernel大小为2*2，步数也为2，周围补0，取最大值。数据量缩小了4倍
@@ -45,24 +49,33 @@ x_image = tf.reshape(xs, [-1, 101, 99, 1])
 
 ## 第一层卷积操作 ##
 # 第一二参数值得卷积核尺寸大小，即patch，第三个参数是图像通道数，第四个参数是卷积核的数目，代表会出现多少个卷积特征图像;
-W_conv1 = weight_variable([5, 5, 1, 64])
+W_conv1 = weight_variable([11, 11, 1, 64])
 # 对于每一个卷积核都有一个对应的偏置量。
 b_conv1 = bias_variable([64])
 # 图片乘以卷积核，并加上偏执量，卷积结果16*15*64
-h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
+h_conv1 = tf.nn.relu(conv2d2s(x_image, W_conv1) + b_conv1)
 
 ##Flatten
 #BatchNorm
-h_norm2=tf.layers.batch_normalization(h_conv1,1)#待商榷
+# h_norm2=tf.layers.batch_normalization(h_conv1,1)#待商榷
+
+
+
 #2x2池化，边缘丢弃
-h_pool2 = max_pool_2x2(h_norm2)#此时输出为7*8*64
-# 扁平处理
-h_pool2_flat = tf.reshape(h_pool2,[-1, 8*7*64])
+h_pool1 = max_pool_2x2(h_conv1)#此时输出为8*7*64
+print(h_pool1.shape)
+
+# ##第二层卷积操作
+# W_conv2 = weight_variable([3,3,1,64])
+# b_conv2 = bias_variable([64])
+# h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
+ # 扁平处理
+h_pool1_flat = tf.reshape(h_pool1,[-1, 8*7*64])
 
 ##Dense全连接
 W_fc1 = weight_variable([8*7*64,64])
 b_fc1 = bias_variable([64])
-h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+h_fc1 = tf.nn.relu(tf.matmul(h_pool1_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)  # 对卷积结果执行dropout操作
 
 ##输出层
@@ -96,6 +109,8 @@ def readdata(batchnumber,batchsize):
                 # print(os.path.join(root,file))输出带根目录的文件路径
                 data.append(my_matrix)
                 label.append(labedict[filename])
+    data=np.reshape(data,[batchsize,101,99,1])
+    label=np.reshape(label,[-1,1])
     return data,label
 
 correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(ys, 1))
@@ -107,13 +122,14 @@ ITERS = 20000#总迭代次数
 BATCH_SIZE = 64
 
 #剩余数据作为测试
-test_data,test_label =readdata(41,BATCH_SIZE)
+test_data,test_label =readdata(41,64)
+# test_data=np.reshape(test_data,(64,101,99,1))
+# test_label=np.reshape(test_label,(-1.1))
 
 for i in range(1,40):
     data,label= readdata(i,64)#次数出现为list类型
-    data = np.reshape(data, (64, 101, 99, 1))
-    print(label)
-    label = np.reshape(label,(-1,1))
+    # data = np.reshape(data, (64, 101, 99, 1))
+    # label = np.reshape(label,(-1,1))
     train_step.run(feed_dict={xs: data, ys: label, keep_prob: 0.5})
     # data.rehsape((data.shape[0], 101, 99, 1))
     if i % 2 == 0:
