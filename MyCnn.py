@@ -113,6 +113,8 @@ def readdata(batchnumber,batchsize):
     label=np.reshape(label,[-1,1])
     return data,label
 
+
+y_conv=(y_conv*2>=1)
 correct_prediction = tf.equal(y_conv, ys)
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
