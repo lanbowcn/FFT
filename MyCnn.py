@@ -116,25 +116,25 @@ def readdata(batchnumber,batchsize):
 correct_prediction = tf.equal(y_conv, ys)
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
+sess.run(tf.global_variables_initializer())
 
-tf.global_variables_initializer().run()
+# tf.global_variables_initializer().run()
 ITERS = 20000#总迭代次数
 BATCH_SIZE = 64
 
 #剩余数据作为测试
-test_data,test_label =readdata(40,64)
+test_data,test_label =readdata(1,512)
+
 # test_data=np.reshape(test_data,(64,101,99,1))
 # test_label=np.reshape(test_label,(-1.1))
 
 for i in range(1, 39):
     data,label= readdata(i,64)#次数出现为list类型
-    # data = np.reshape(data, (64, 101, 99, 1))
-    # label = np.reshape(label,(-1,1))
-    # train_step.run(feed_dict={xs: data, ys: label, keep_prob: 0.5})
-    train_accuracy = accuracy.eval(feed_dict={xs:data, ys: label, keep_prob: 0.5})
-    # data.rehsape((data.shape[0], 101, 99, 1))
+    train_accuracy = accuracy.eval(feed_dict={xs:data, ys: label, keep_prob: 1.0})
+    # 修改
+    print("step %d, training accuracy %g" % (i, train_accuracy))
+    train_step.run(feed_dict={xs: data, ys: label, keep_prob: 1.0})
+    # 测试
     if i % 2 == 0:
-        train_accuracy = accuracy.eval(feed_dict={xs: test_data, ys: test_label, keep_prob: 1.0})
-        print("step %d, training accuracy %g" % (i, train_accuracy))
-print("test accuracy %g" % accuracy.eval(feed_dict={xs: test_data, ys: test_label, keep_prob: 1.0}))
-# sess.run(accuracy, feed_dict=)
+        print("test accuracy %g" % accuracy.eval(feed_dict={xs: test_data, ys: test_label, keep_prob: 1.0}))
+
